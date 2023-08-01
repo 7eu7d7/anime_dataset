@@ -3,7 +3,7 @@ from typing import Iterator, Tuple, Union
 
 from hbutils.system import urlsplit
 from pyquery import PyQuery as pq
-from waifuc.source import SankakuSource, AnimePicturesSource
+from waifuc.source import SankakuSource, AnimePicturesSource, ZerochanSource
 from waifuc.source.web import NoURL
 from waifuc.utils import srequest
 
@@ -91,6 +91,46 @@ class AnimePicturesPageSource(AnimePicturesSource):
                     'tags':{key:1.0 for key in tags}
                 }
                 yield post['id'], url, meta
+
+            page += 1
+            if page>=self.page_end:
+                break
+
+class ZerochanPageSource(ZerochanSource):
+    def set_page_range(self, start=1, end=2):
+        self.page_start = start+1
+        self.page_end = end+1
+
+    def _iter_data(self) -> Iterator[Tuple[Union[str, int], str, dict]]:
+        page = self.page_start
+        while True:
+            resp = srequest(self.session, 'GET', self._base_url,
+                            params={**self._params, 'p':str(page), 'l':'200'},
+                            raise_for_status=False)
+            if resp.status_code in {403, 404}:
+                break
+            resp.raise_for_status()
+
+            json_ = resp.json()
+            if 'items' in json_:
+                items = json_['items']
+                for data in items:
+                    url = self._get_url(data)
+                    _, ext_name = os.path.splitext(urlsplit(url).filename)
+                    if ext_name.lower() == '.gif':
+                        continue
+                    filename = f'{self.group_name}_{data["id"]}{ext_name}'
+                    meta = {
+                        'zerochan':{
+                            **data,
+                            'url':url,
+                        },
+                        'group_id':f'{self.group_name}_{data["id"]}',
+                        'filename':filename,
+                    }
+                    yield data["id"], url, meta
+            else:
+                break
 
             page += 1
             if page>=self.page_end:

@@ -4,7 +4,7 @@ import time
 from waifuc.action import FirstNSelectAction, \
     ModeConvertAction, RandomFilenameAction, AlignMinSizeAction
 from waifuc.export import SaveExporter
-from page_source import AnimePicturesPageSource
+from page_source import AnimePicturesPageSource, ZerochanPageSource
 from waifuc.source.anime_pictures import OrderBy
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED, ALL_COMPLETED
 
@@ -12,7 +12,8 @@ os.environ['http_proxy'] = 'http://127.0.0.1:1080'
 os.environ['https_proxy'] = 'http://127.0.0.1:1080'
 
 def spider(start, end):
-    s = AnimePicturesPageSource([], order_by=OrderBy.DATE)
+    #s = AnimePicturesPageSource([], order_by=OrderBy.DATE)
+    s = ZerochanPageSource([])
     s.set_page_range(start, end)
 
     # crawl images, process them, and then save them to directory with given format
@@ -32,7 +33,6 @@ def spider(start, end):
     )
 
 if __name__ == '__main__':
-    from transformers import AutoModelForSeq2SeqLM, AutoTokenizer, T5EncoderModel
 
     with ThreadPoolExecutor(max_workers=20) as t:
         page_step = 10

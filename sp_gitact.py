@@ -7,13 +7,14 @@ from huggingface_hub import login, HfApi
 from waifuc.action import FirstNSelectAction, \
     ModeConvertAction, RandomFilenameAction, AlignMinSizeAction
 from waifuc.export import SaveExporter
-from page_source import AnimePicturesPageSource
+from page_source import AnimePicturesPageSource, ZerochanPageSource
 from waifuc.source.anime_pictures import OrderBy
 from concurrent.futures import ThreadPoolExecutor, wait, FIRST_COMPLETED, ALL_COMPLETED
 
 
 def spider(start, end, save_step):
-    s = AnimePicturesPageSource([], order_by=OrderBy.DATE)
+    #s = AnimePicturesPageSource([], order_by=OrderBy.DATE)
+    s = ZerochanPageSource([])
     s.set_page_range(start, end)
 
     # crawl images, process them, and then save them to directory with given format
@@ -60,9 +61,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='anime dataset test1')
     parser.add_argument('--hf_token', type=str, default='')
     parser.add_argument('--start_page', type=int, default=0)
-    parser.add_argument('--end_page', type=int, default=10)
-    parser.add_argument('--page_step', type=int, default=1)
-    parser.add_argument('--save_step', type=int, default=5)
+    parser.add_argument('--end_page', type=int, default=10000)
+    parser.add_argument('--page_step', type=int, default=10)
+    parser.add_argument('--save_step', type=int, default=200)
     args = parser.parse_args()
 
     login(args.hf_token)
