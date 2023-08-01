@@ -1,3 +1,4 @@
+import os
 import argparse
 import zipfile
 import shutil
@@ -33,8 +34,14 @@ def spider(start, end, save_step):
 
 def upload_to_hf(api, gid):
     # 把 gid 这个组压缩
-    zip_file = zipfile.ZipFile(f'group{gid}.zip', 'w')
-    zip_file.write(f'data_v1/group{gid}', compress_type=zipfile.ZIP_DEFLATED)
+    zip_file = zipfile.ZipFile(f'group{gid}.zip', 'w', zipfile.ZIP_DEFLATED)
+
+    startdir = f'data_v1/group{gid}'
+    for dirpath, dirnames, filenames in os.walk(startdir):
+        fpath = dirpath.replace(startdir, '')  # 这一句很重要，不replace的话，就从根目录开始复制
+        fpath = fpath and fpath+os.sep or ''  # 这句话理解我也点郁闷，实现当前文件夹以及包含的所有文件的压缩
+        for filename in filenames:
+            zip_file.write(os.path.join(dirpath, filename), fpath+filename)
     zip_file.close()
 
     # 删除图片文件夹
@@ -46,6 +53,8 @@ def upload_to_hf(api, gid):
         repo_id="7eu7d7/AnimeUniverse",
         repo_type="dataset",
     )
+    print(f'upload group{gid}.zip')
+    os.remove(f'group{gid}.zip')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='anime dataset test1')
@@ -64,9 +73,9 @@ if __name__ == '__main__':
             range(args.start_page//args.page_step, args.end_page//args.page_step)]
 
         save_step = args.save_step//args.page_step
-        task_group = [all_task[i:i+3] for i in range(0,len(all_task),save_step)]
+        task_group = [all_task[i:i+save_step] for i in range(0,len(all_task),save_step)]
         for gid, task in enumerate(task_group):
             wait(task, return_when=ALL_COMPLETED)
-
+            upload_to_hf(api, gid)
 
         print('finished')
