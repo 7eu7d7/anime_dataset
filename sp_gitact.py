@@ -69,7 +69,7 @@ if __name__ == '__main__':
     login(args.hf_token)
     api = HfApi()
 
-    with ThreadPoolExecutor(max_workers=5) as t:
+    with ThreadPoolExecutor(max_workers=2) as t:
         all_task = [t.submit(spider, page*args.page_step, page*args.page_step+args.page_step, args.save_step) for page in
             range(args.start_page//args.page_step, args.end_page//args.page_step)]
 
