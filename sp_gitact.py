@@ -48,7 +48,7 @@ def upload_to_hf(api, gid):
     )
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='anime dataset')
+    parser = argparse.ArgumentParser(description='anime dataset test')
     parser.add_argument('--hf_token', type=str, default='')
     parser.add_argument('--start_page', type=int, default=0)
     parser.add_argument('--end_page', type=int, default=10)
